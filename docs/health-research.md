@@ -77,6 +77,7 @@ SDK 共 4598 行，**自查模式只需移植约 1800 行中的核心协议**，
 ### 1.5 登录链路（qr.py / sts.py / passtoken.py / _helpers.py 已确认）
 
 - **扫码**：GET `account.xiaomi.com/longPolling/loginUrl`（sid=`miothealth`，callback=STS URL，带 deviceId cookie）→ 响应剥 `&&&START&&&` 前缀 → `{qr: 二维码图片URL, loginUrl: 备用链接, lp: 长轮询URL, timeout}`
+- **扫码 App**（真机确认）：二维码是小米 passport 登录码（`account.xiaomi.com/pass/qr/login?ticket=lp_…`），须用**小米手机系统扫一扫 / 设置→小米账号→扫一扫 / 米家 App 扫一扫**；「小米运动健康」App 的扫一扫仅支持设备配对，会报「二维码不支持」。兜底：浏览器打开 `loginUrl` 登录确认。原版 mi-fitness 日志即提示「请使用小米账号 APP 扫描」
 - **长轮询**：GET `lp`，单次请求 60s 超时，非 200 继续等，总超时 `min(timeout, 300s)` → 200 即扫码成功，返回 `{ssecurity, userId, passToken, cUserId, location}`
 - **serviceToken**：跟随 `location` 重定向（不自动 follow），从 `set-cookie` 提取；兜底查 location query
 - **STS**：GET `sts-hlth.io.mi.com/healthapp/sts?d=deviceId&ticket=0&pwd=0&p_ts=…&fid=0&p_lm=2&p_ur=CN` → `"ok"`；**非致命**
@@ -92,6 +93,7 @@ SDK 共 4598 行，**自查模式只需移植约 1800 行中的核心协议**，
 4. **参考项目日期按 UTC 归一化**：东八区偏 8 小时 → **我们按 Asia/Shanghai 归一化**，与日记日期对齐（SDK 查询窗口本身已是 UTC+8）
 5. **压力**：参考项目 schema 留了字段但没实现拉取 → 自查模式补 `key="stress"` 聚合请求，**需真机验证字段**
 6. 非官方 API 随时可能失效；GPL-3.0 衍生作品声明（见 3.5）
+7. **own 模式 latest 端点不可用**（真机确认）：`get_latest_fitness_data` 在自查模式恒返回 `code=-8 invalid params`（亲友专用，与参数无关）；聚合/原始端点正常。latest 仅作 goal/体重/血压快照补充 → 同步时静默降级为空，不阻塞核心每日数据
 
 ---
 
@@ -221,7 +223,7 @@ SDK 共 4598 行，**自查模式只需移植约 1800 行中的核心协议**，
 
 **修复**：① 睡眠详情分期图例窄列换行 → 改 2 列网格 + `whitespace-nowrap`；② 同步失败后状态查询未刷新 → `onError` 增加 `invalidateQueries(['health','status'])`，UI 立即反映 broken/needs_relogin。
 
-**待用户真机验收（H4）**：真实小米账号扫码 → 首同步 → 数据入库 → 对照小米 App 核对（重点：压力字段实验性映射、日期边界、睡眠主段选取）。压力字段为候选名映射 + raw 兜底，需真机原始 JSON 确认。
+**真机联调（2026-11-15）**：用户小米账号扫码成功（须用小米账号/米家扫一扫，非小米运动健康）。首同步暴露 bug：`fetchAll` 末尾无容错的 `getLatest()` 因 own 模式不支持 latest 端点（code=-8）拖垮整体 → 已改为静默降级（401 仍上抛续期）。真机探测确认聚合端点正常返回 7 天数据：步数/心率/睡眠（评分78+分段）/卡路里/强度/有效站立均有值；血氧/压力/目标/体重/血压该设备无记录（len=0）。压力字段映射仍待有压力数据的设备验证。QR 对话框引导文案已更正为正确扫码方式 + 浏览器登录兜底链接。
 
 **部署（2026-11-15）**：健康功能 + 用户 WIP 已上线正式 Docker 环境（`diary.home.rethinkos.com`）。修复一处部署阻塞：原 Dockerfile CMD 用 `prisma db push`，会删除不在 schema 中的 FTS5 影子表（`entries_fts*`）→ 数据丢失警告 → 非零退出 → 容器重启循环。改为 `server/scripts/safe-db-sync.cjs`：`prisma migrate diff` 生成增量 SQL，白名单仅应用 CREATE/ALTER，跳过 DROP 与 PRAGMA 脚手架，经 node:sqlite 事务执行——保护 FTS 与既有数据，幂等且兼容全新库。部署前已一致性备份正式库（`server/data/backups/*-before-health-deploy/`）。authenticated 实测：健康 status/daily、知识库、日历 API 均 200，Entry=FTS=12 完好。
 

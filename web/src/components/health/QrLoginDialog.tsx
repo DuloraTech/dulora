@@ -183,6 +183,18 @@ export function QrLoginDialog({
           )}
         </div>
 
+        {/* 浏览器登录兜底（非小米手机 / 无米家时可用） */}
+        {current && status === 'pending' && current.loginUrl && (
+          <a
+            href={current.loginUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="mt-2 text-[11px] font-medium text-indigo-600 underline-offset-2 hover:underline dark:text-indigo-400"
+          >
+            扫不了？在浏览器中打开登录页
+          </a>
+        )}
+
         {/* 状态行 */}
         <div className="mt-3 flex h-5 items-center gap-2 text-xs text-zinc-400 dark:text-zinc-500">
           {status === 'pending' && (
@@ -200,10 +212,13 @@ export function QrLoginDialog({
       </div>
 
       <ol className="mt-4 space-y-1.5 rounded-xl bg-zinc-50 p-3.5 text-xs leading-relaxed text-zinc-500 dark:bg-zinc-800/40 dark:text-zinc-400">
-        <li>1. 打开「小米运动健康」App，使用扫一扫功能</li>
+        <li>1. 小米手机：用系统「扫一扫」（或 设置 → 小米账号 → 扫一扫）；其他手机：用「米家」App 的扫一扫</li>
         <li>2. 扫描上方二维码并在手机上确认登录</li>
         <li>3. 连接成功后自动同步最近 7 天数据，可随时手动同步更多</li>
       </ol>
+      <p className="mt-2 text-center text-[11px] leading-relaxed text-zinc-400 dark:text-zinc-500">
+        注意：「小米运动健康」App 的扫一扫仅用于设备配对，无法识别此登录二维码。
+      </p>
       <p className="mt-3 text-center text-[11px] leading-relaxed text-zinc-400 dark:text-zinc-500">
         凭证仅保存在本机数据库，不会上传到任何第三方；可随时在下方断开连接。
       </p>

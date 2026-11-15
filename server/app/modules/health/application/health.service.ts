@@ -316,7 +316,15 @@ export class HealthService {
     if (warnings.length === AGGREGATED_KEYS.length + FITNESS_KEYS.length) {
       throw new ApiError(`全部指标拉取失败: ${warnings[0] ?? '未知错误'}`);
     }
-    const latest: RawLatestItem[] = await client.getLatest();
+    // latest 快照（goal/体重/血压）仅亲友模式支持；own 自查模式恒返回 code=-8 invalid params，
+    // 属结构性不可用而非临时故障 → 静默降级为空，不阻塞同步、不产生告警噪音。
+    // 核心每日数据已由 aggregated + fitness 覆盖；401 仍向上抛以触发 passToken 续期。
+    let latest: RawLatestItem[] = [];
+    try {
+      latest = await client.getLatest();
+    } catch (err) {
+      if (err instanceof TokenExpiredError) throw err;
+    }
     return { payload: { aggregated, fitness, latest }, warnings };
   }
 
