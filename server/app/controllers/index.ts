@@ -4,6 +4,7 @@ import { HealthController } from './health.controller';
 import { CalendarController, EntryController } from './entry.controller';
 import { TagController } from './tag.controller';
 import { SearchController, SettingsController } from './settings.controller';
+import { HealthDataController } from './health-data.controller';
 
 export const controllers = [
   AuthController,
@@ -13,4 +14,5 @@ export const controllers = [
   TagController,
   SearchController,
   SettingsController,
+  HealthDataController,
 ];

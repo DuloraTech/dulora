@@ -1,0 +1,90 @@
+{
+  "_provenance": "Generated from mi-fitness 0.2.0 crypto.py (GPL-3.0, MistEO) for port verification. Dev-only fixture.",
+  "ssecurity": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8=",
+  "nonce": "AAECAwQFBgcAvGFO",
+  "signed_nonce": "PHVwBoxD6o/RPNqslzomOlNU4/go0rm1MaxXHUKN0xI=",
+  "vectors": [
+    {
+      "name": "aggregated_steps",
+      "method": "GET",
+      "path": "/app/v1/data/get_aggregated_fitness_data_by_time",
+      "params": {
+        "relative_uid": 123456789,
+        "key": "steps",
+        "tag": "daily_report",
+        "start_time": 1700000000,
+        "end_time": 1700086399,
+        "limit": 7
+      },
+      "enc": {
+        "data": "6TwYX7LM14dfY7fxbWRolW5CbsT4leSchpBKFCrihqy8F47SoKMZJVT/sBLAZurFl14q2kcIBd5qfxEj/HnTf15DP+BbwxPohl1HMZOCyaDdnm4vfBv1nf85ZiV4WBUdmM46JqwD9EEG0HDP6cu8fUiREzxi",
+        "rc4_hash__": "lpFnKV9oZy2s9fgC13foteJXAChbHzEq4sXv5w==",
+        "signature": "sZPxFxsfw4Dg3IMFKdRoiRADuCc=",
+        "_nonce": "AAECAwQFBgcAvGFO"
+      }
+    },
+    {
+      "name": "unicode_post",
+      "method": "POST",
+      "path": "/app/v1/data/get_fitness_data_by_time",
+      "params": {
+        "key": "sleep",
+        "note": "睡眠数据·测试",
+        "ratio": 0.5,
+        "nested": {
+          "a": [
+            1,
+            2,
+            3
+          ],
+          "b": true
+        }
+      },
+      "enc": {
+        "data": "6TwBX6ePmcxaao3hdCJmjTEfKZXvmfFDIh2P4+99MSZ46VR1ZzaOgp4kRFfOfrrAgl4pgSJKTpspLwtkoy/Fbx0LMJ1OiETWlUtEKpDv1bKPjGRrIkz1juY=",
+        "rc4_hash__": "A0UVW2tFTpnMRHvSSa88V74Pv8zxmm0M0ktsIg==",
+        "signature": "0R8bbtF+Hj/qrzueW/w9VbCJUfk=",
+        "_nonce": "AAECAwQFBgcAvGFO"
+      }
+    },
+    {
+      "name": "no_params",
+      "method": "GET",
+      "path": "/app/v1/data/get_latest_fitness_data",
+      "params": null,
+      "enc": {
+        "rc4_hash__": "+lxaVO7Zz7geZLvuQjkD4hMbLqCd04HpyvgxQg==",
+        "signature": "Ky0UN0R7qkK+uKZX38yW8vymWfg=",
+        "_nonce": "AAECAwQFBgcAvGFO"
+      }
+    },
+    {
+      "name": "response_decrypt",
+      "ciphertext": "6TwJVbrIgdQZKsrpYXM5zjgVf8rvzLiGk54aGjzuyOK8XoGVtLFPaCnnuAaWfvL6jRU1ynxYWoxoZAp1uD7BZ0tZaZMN3h/qhl1UYsLblemy3DtvP0vk0bdEeSlsHw0F2o1vZu8Z7lBLgDGIp5jgIwyDGTsvwsIbdlZzaS6sp+pznjmb2dwIFS5HK0dei7aF7iKRd2H5Rj9wiuGYzFOfCBT/9XGeRuDEyW2kqayG2EfrpkfawVeibFNYxQ+1XJxExrfYb2lC3JNf6mkyzO0USg+3p6SXhdTtyrNc95CZSEOHoT22QShiVdXbxte/kTo9wahE",
+      "expected": {
+        "code": 0,
+        "message": "ok",
+        "result": {
+          "data_list": [
+            {
+              "sid": "miothealth",
+              "tag": "daily_report",
+              "key": "steps",
+              "time": 1700000000,
+              "value": "{\"steps\":12345,\"distance\":8000,\"calories\":400}",
+              "update_time": 1700000100,
+              "watermark": 0
+            }
+          ],
+          "has_more": false
+        }
+      }
+    },
+    {
+      "name": "rc4_basic",
+      "key_b64": "AAECAwQFBgcICQoLDA0ODw==",
+      "plaintext": "The quick brown fox jumps over the lazy dog. 中文测试 0123456789",
+      "ciphertext_b64": "3mnNNkhbGPrK8OTRFl9ASI1Jm4MwJznYEQiHeERUOWU1VRkMg4Xe1GKD41UhubgLGUuCM2sstJo2QodflebNQ/eqft0="
+    }
+  ]
+}

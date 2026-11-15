@@ -51,3 +51,133 @@ model EntryTag {
 
   @@id([entryId, tagId])
 }
+
+// ===== 健康数据模块（小米运动健康同步，方案见 docs/health-research.md v0.3）=====
+
+/// 小米账号凭证（单用户单账号；凭证永不经过 API 返回）
+model HealthAccount {
+  id           Int       @id @default(1)
+  userId       String
+  cUserId      String
+  serviceToken String
+  ssecurity    String
+  passToken    String    @default("")
+  deviceId     String
+  status       String    @default("active") // active / needs_relogin
+  connectedAt  DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  lastSyncAt   DateTime?
+}
+
+/// 同步配置（单行）
+model HealthConfig {
+  id                Int     @id @default(1)
+  enabled           Boolean @default(true)
+  syncIntervalHours Int     @default(6)
+  syncDays          Int     @default(7)
+}
+
+/// 每日健康汇总（date 按 Settings.timezone 归一化，与日记日期对齐）
+model HealthDaily {
+  id                    Int      @id @default(autoincrement())
+  date                  String   @unique // yyyy-MM-dd
+  // 活动
+  steps                 Int?
+  distanceM             Float?
+  activityCalories      Float?
+  intensityMinutes      Int?
+  validStand            Int?
+  // 目标（latest 快照，field: 1=步数 2=卡路里 4=中高强度）
+  stepsGoal             Int?
+  stepsGoalAchieved     Int?
+  caloriesGoal          Float?
+  caloriesGoalAchieved  Float?
+  intensityGoal         Int?
+  intensityGoalAchieved Int?
+  // 睡眠（主睡眠汇总，时长单位分钟）
+  sleepScore            Int?
+  sleepDuration         Int?
+  sleepDeep             Int?
+  sleepLight            Int?
+  sleepRem              Int?
+  sleepAwake            Int?
+  bedtime               Int? // epoch 秒
+  wakeTime              Int?
+  sleepAvgHr            Int?
+  sleepMaxHr            Int?
+  sleepMinHr            Int?
+  sleepAvgSpo2          Int?
+  // 心率
+  avgHr                 Int?
+  restingHr             Int?
+  maxHr                 Int?
+  minHr                 Int?
+  abnormalHrCount       Int?
+  hrWarmUpMin           Int?
+  hrFatBurnMin          Int?
+  hrAerobicMin          Int?
+  hrAnaerobicMin        Int?
+  hrExtremeMin          Int?
+  // 血氧
+  avgSpo2               Int?
+  maxSpo2               Int?
+  minSpo2               Int?
+  // 压力（自查模式独有；字段映射待真机验证，raw 保留原始 JSON）
+  stressAvg             Int?
+  stressMin             Int?
+  stressMax             Int?
+  stressRelaxMin        Int?
+  stressMildMin         Int?
+  stressModerateMin     Int?
+  stressSevereMin       Int?
+  // 血压（latest 快照）
+  systolic              Int?
+  diastolic             Int?
+  pulse                 Int?
+  // 最新体重快照（kg）
+  weightKg              Float?
+  raw                   String? // 当日各指标原始 value JSON（排错/字段扩展用）
+  updatedAt             DateTime @updatedAt
+}
+
+/// 睡眠分段（主睡眠 + 午睡全保留）
+model HealthSleepSegment {
+  id         Int    @id @default(autoincrement())
+  date       String
+  kind       String // main / nap
+  bedtime    Int
+  wakeUpTime Int
+  duration   Int // 分钟
+  deepMin    Int    @default(0)
+  lightMin   Int    @default(0)
+  remMin     Int    @default(0)
+  awakeMin   Int    @default(0)
+  awakeCount Int    @default(0)
+  avgHr      Int?
+  avgSpo2    Int?
+
+  @@index([date])
+}
+
+/// 体重测量事件（体脂率仅原始测量里有）
+model HealthWeightLog {
+  id         Int    @id @default(autoincrement())
+  time       Int    @unique // 测量时间 epoch 秒
+  date       String
+  weightKg   Float
+  bmi        Float?
+  bodyFatPct Float?
+
+  @@index([date])
+}
+
+/// 同步历史
+model HealthSyncRun {
+  id            Int       @id @default(autoincrement())
+  startedAt     DateTime  @default(now())
+  finishedAt    DateTime?
+  status        String    @default("running") // running / ok / error
+  daysRequested Int
+  daysWritten   Int       @default(0)
+  error         String?
+}

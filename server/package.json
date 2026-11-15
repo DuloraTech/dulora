@@ -7,6 +7,7 @@
     "build": "node build.js",
     "start": "node dist/app.js",
     "typecheck": "tsc --noEmit",
+    "test": "node --import tsx --test \"app/**/*.test.ts\"",
     "db:push": "prisma db push"
   },
   "dependencies": {
