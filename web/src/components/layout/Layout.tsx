@@ -5,6 +5,7 @@ import { useTheme } from '../../hooks/useTheme';
 const NAV_ITEMS = [
   { to: '/', label: '日历', icon: '📅', end: true },
   { to: '/timeline', label: '时间线', icon: '📚', end: false },
+  { to: '/health', label: '健康', icon: '💪', end: false },
   { to: '/tags', label: '标签', icon: '🏷️', end: false },
   { to: '/search', label: '搜索', icon: '🔍', end: false },
   { to: '/settings', label: '设置', icon: '⚙️', end: false },

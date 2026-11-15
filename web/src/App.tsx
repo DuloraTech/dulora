@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { AuthProvider, useAuth } from './hooks/useAuth';
 import { Layout } from './components/layout/Layout';
@@ -8,6 +9,10 @@ import { EntryEditPage } from './pages/EntryEditPage';
 import { TagsPage } from './pages/TagsPage';
 import { SearchPage } from './pages/SearchPage';
 import { SettingsPage } from './pages/SettingsPage';
+
+// 健康页懒加载：recharts 仅在访问 /health 时加载
+const HealthPage = lazy(() => import('./pages/HealthPage').then((m) => ({ default: m.HealthPage })));
+const HealthSleepPage = lazy(() => import('./pages/HealthSleepPage').then((m) => ({ default: m.HealthSleepPage })));
 
 function FullScreenLoader() {
   return (
@@ -56,6 +61,22 @@ export default function App() {
           <Route path="/entries/:id" element={<EntryEditPage />} />
           <Route path="/tags" element={<TagsPage />} />
           <Route path="/search" element={<SearchPage />} />
+          <Route
+            path="/health"
+            element={
+              <Suspense fallback={<FullScreenLoader />}>
+                <HealthPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/health/sleep"
+            element={
+              <Suspense fallback={<FullScreenLoader />}>
+                <HealthSleepPage />
+              </Suspense>
+            }
+          />
           <Route path="/settings" element={<SettingsPage />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
