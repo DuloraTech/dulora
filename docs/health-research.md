@@ -223,6 +223,8 @@ SDK 共 4598 行，**自查模式只需移植约 1800 行中的核心协议**，
 
 **待用户真机验收（H4）**：真实小米账号扫码 → 首同步 → 数据入库 → 对照小米 App 核对（重点：压力字段实验性映射、日期边界、睡眠主段选取）。压力字段为候选名映射 + raw 兜底，需真机原始 JSON 确认。
 
+**部署（2026-11-15）**：健康功能 + 用户 WIP 已上线正式 Docker 环境（`diary.home.rethinkos.com`）。修复一处部署阻塞：原 Dockerfile CMD 用 `prisma db push`，会删除不在 schema 中的 FTS5 影子表（`entries_fts*`）→ 数据丢失警告 → 非零退出 → 容器重启循环。改为 `server/scripts/safe-db-sync.cjs`：`prisma migrate diff` 生成增量 SQL，白名单仅应用 CREATE/ALTER，跳过 DROP 与 PRAGMA 脚手架，经 node:sqlite 事务执行——保护 FTS 与既有数据，幂等且兼容全新库。部署前已一致性备份正式库（`server/data/backups/*-before-health-deploy/`）。authenticated 实测：健康 status/daily、知识库、日历 API 均 200，Entry=FTS=12 完好。
+
 ## 5. 风险
 
 | 风险 | 缓解 |

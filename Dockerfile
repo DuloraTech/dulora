@@ -27,4 +27,4 @@ COPY --from=server /build/server ./
 COPY --from=web /build/web/dist /app/web-dist
 EXPOSE 3000
 VOLUME /app/data
-CMD ["sh", "-c", "mkdir -p /app/data && touch /app/data/dulora.db && npx prisma db push --skip-generate && node dist/app.js"]
+CMD ["sh", "-c", "mkdir -p /app/data && touch /app/data/dulora.db && node scripts/safe-db-sync.cjs && node dist/app.js"]
